@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <param name="robot_description" textfile="$(find iiwa14)/urdf/iiwa14_with_wall.urdf" />
+    
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <node pkg="iiwa14" type="offline.py" name="trajectory_display" output="screen" /> 
+
+    <node name="rviz" pkg="rviz" type="rviz"/>
+
+</launch>

@@ -1,0 +1,6 @@
+devel_space: /home/wenxin/Desktop/SAIL/Imitation-Learning-of-MPC-for-LBR-iiwa-14/ros_visualization/devel
+install: false
+install_space: /home/wenxin/Desktop/SAIL/Imitation-Learning-of-MPC-for-LBR-iiwa-14/ros_visualization/install
+profile: default
+source_space: /home/wenxin/Desktop/SAIL/Imitation-Learning-of-MPC-for-LBR-iiwa-14/ros_visualization/src
+workspace: /home/wenxin/Desktop/SAIL/Imitation-Learning-of-MPC-for-LBR-iiwa-14/ros_visualization

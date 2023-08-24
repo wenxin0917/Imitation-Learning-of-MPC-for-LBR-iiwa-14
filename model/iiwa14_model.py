@@ -4,6 +4,8 @@ import numpy as np
 import casadi as cs
 from acados_template import AcadosModel
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Symbolic_model:
     def __init__(self,integrator:str = 'collocation', dt: float=0.001) -> None:
@@ -118,10 +120,57 @@ class Symbolic_model:
 
 if __name__ == "__main__":
     
-
-    q_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37])
+    # reference joint position for single point
+    # q_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37])
     model = Symbolic_model()
-    pee = model.forward_kinemetics(q_ref)
-    print(pee)
-    gravity = model.gravity_torque(q_ref)
-    print(gravity)
+    # pee = model.forward_kinemetics(q_ref)
+    # print("pee is: ", pee)
+    # gravity = model.gravity_torque(q_ref)
+    # print("gravity is: ",gravity)
+    # center of the circle
+    # q_center = np.array([0,-1.58,0,-1.58,0,0,0])
+    # p_center = model.forward_kinemetics(q_center)
+    # print("p_center is: ", p_center)
+    
+    
+    
+    # calculate the circle points to compare the result of inverse kinematcis
+    q_circle_ref = np.loadtxt("data/200circle_joint_xy0.1.txt",delimiter=',')
+    print("shape:", q_circle_ref.shape)
+    pee_circle = np.zeros((q_circle_ref.shape[0],3))
+    for i in range(q_circle_ref.shape[0]):
+        p_circle = model.forward_kinemetics(q_circle_ref[i,:])
+        pee_circle[i,:] = p_circle.reshape(3,)
+    
+    """
+    # show the change of each joint   
+    fig,axes = plt.subplots(7,1)
+    t = range(q_circle_ref.shape[0])
+    axes[0].plot(t, q_circle_ref[:,0],label='q1' 'r')
+    axes[1].plot(t, q_circle_ref[:,1],label='q2' 'r')
+    axes[2].plot(t, q_circle_ref[:,2],label='q3' 'r')
+    axes[3].plot(t, q_circle_ref[:,3],label='q4' 'r')
+    axes[4].plot(t, q_circle_ref[:,4],label='q5' 'r')
+    axes[5].plot(t, q_circle_ref[:,5],label='q6' 'r')
+    axes[6].plot(t, q_circle_ref[:,6],label='q7' 'r')
+    plt.show()
+
+    # plot the circle points deduced from the result of the inverse kinematics    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for i in range(np.shape(pee_circle)[0]):
+        point = pee_circle[i,:]
+        ax.scatter(point[0],point[1],point[2], c='b', marker='o')
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    plt.show()
+    z_gap = np.max(pee_circle[:,2]) - np.min(pee_circle[:,2])
+    x_gap = np.max(pee_circle[:,0]) - np.min(pee_circle[:,0])
+    y_gap = np.max(pee_circle[:,1]) - np.min(pee_circle[:,1])
+    print("z_gap is: ", z_gap)
+    print("x_gap is: ", x_gap)
+    print("y_gap is: ", y_gap)
+    """
+  

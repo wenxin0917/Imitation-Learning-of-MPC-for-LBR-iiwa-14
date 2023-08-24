@@ -23,7 +23,7 @@ class iiwa14EnvOptions:
             self.dt = 0.01
         else:
             self.dt = dt 
-            
+        # x_start is used to set the initial state of the robot, if None a random state is sampled in reset()
         if x_start is None:
              self.x_start = None
         else:
@@ -130,7 +130,7 @@ class iiwa14Env(gym.Env):
     def sample_rand_config(self):  
         q = []
         q_range = np.deg2rad([170,120,170,120,170,120,175])
-        alpha = 0.2
+        alpha = 0.3
         for limit in q_range:
             single_joint = np.random.uniform(alpha * limit, -alpha * limit)
             q.append(single_joint)
