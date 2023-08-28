@@ -17,9 +17,9 @@ def generate_expert_data(horizon_n,x_0,x_ref):
     """
     
     # simulation parameters
-    DT = 0.04 # sampling time
+    DT = 0.05 # sampling time
 
-    N_ITER = 50 #number of simulation iterations
+    N_ITER = 40 #number of simulation iterations
 
     R_Q_sim = np.array([0] * 7)
     R_DQ_sim = np.array([0] * 7)
@@ -83,13 +83,13 @@ def sample_rand_initial_position(alpha:float,q_range:np.array):
 
 
 if __name__ == "__main__":
-    expert_data_state = np.zeros((130,51,14))
-    expert_data_action = np.zeros((130,50,7))
+    expert_data_state = np.zeros((100,41,14))
+    expert_data_action = np.zeros((100,40,7))
     q_range = np.deg2rad([170,120,170,120,170,120,175])
-    alpha = 0.4
+    alpha = 0.3
     np.random.seed(0)
     used_initial_position = set()
-    for i in range(130):
+    for i in range(100):
         x_0 = sample_rand_initial_position(alpha,q_range)
         x_0_tuple = tuple(x_0.flatten())
         if x_0_tuple not in used_initial_position:
@@ -98,11 +98,11 @@ if __name__ == "__main__":
             i= i-1
     used_initial_position_list = list(used_initial_position)
     
-    for i in range(130):
+    for i in range(100):
         x_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37,0,0,0,0,0,0,0]).reshape(14,1)
-        x,u = generate_expert_data(30,np.array(used_initial_position_list[i]).reshape(14,1),x_ref)
+        x,u = generate_expert_data(5,np.array(used_initial_position_list[i]).reshape(14,1),x_ref)
         expert_data_state[i,:,:] = x
         expert_data_action[i,:,:] = u
     
-    np.save('expert_data/state.npy',expert_data_state)
-    np.save('expert_data/action.npy',expert_data_action)
+    np.save('expert_data/state_0.3.npy',expert_data_state)
+    np.save('expert_data/action_0.3.npy',expert_data_action)

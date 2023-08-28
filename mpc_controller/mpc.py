@@ -15,7 +15,7 @@ from model.iiwa14_model import Symbolic_model
 """
 when it is used for the calculation of circle trajectory
 Q_q = 1e7, Q_dq = 1e3, Q_qe = 1e7, Q_dqe = 1e3,
-self.nlp_solver_max_iter : int = 50
+self.nlp_solver_max_iter : int = 100
 self.P = np.diagflat(np.array([1]*3))* 3e7
 self.Pn = np.diagflat(np.array([1]*3))* 1e7
 """   
@@ -28,13 +28,20 @@ self.P = np.diagflat(np.array([1]*3))* 3e3
 self.Pn = np.diagflat(np.array([1]*3))* 1e4
 """
 
+"""
+when it is used for the expert data generation( DT ==0.05)
+Q_q = 0.1, Q_dq = 5e1, Q_qe = 5e2, Q_dqe = 5e1,
+self.nlp_solver_max_iter : int = 100
+self.P = np.diagflat(np.array([1]*3))* 3e3
+self.Pn = np.diagflat(np.array([1]*3))* 1e4
+"""
 
 # define penalty element of Q for state x 
-Q_q = 1e7
-Q_dq = 1e3
+Q_q = 0.1
+Q_dq = 5e1
 # define penalty element of Qn for terminal state x
-Q_qe = 1e7
-Q_dqe = 1e3
+Q_qe = 5e2
+Q_dqe = 5e1
 
 class MpcOptions:
     def __init__(self, tf: float=2, n: int=30) -> None:
@@ -47,13 +54,13 @@ class MpcOptions:
         self.wall_axis: int = 1
         self.wall_value: float = 0.4
         self.wall_pos_side: bool = False
-        self.wall_30deg_constraint_on: bool = True
+        self.wall_30deg_constraint_on: bool = False
         # define the penalty matrices Q R and P
         self.Q = np.diagflat(np.array([[Q_q]*7 + [Q_dq]*7]))
         self.R = np.diagflat(np.array([0.001]*7))
-        self.P = np.diagflat(np.array([1]*3))* 3e7
+        self.P = np.diagflat(np.array([1]*3))* 3e3
         self.Qn = np.diagflat(np.array([[Q_qe]*7 + [Q_dqe]*7]))
-        self.Pn = np.diagflat(np.array([1]*3))* 1e7
+        self.Pn = np.diagflat(np.array([1]*3))* 1e4
         self.speed_slack: float = 1e6
         self.wall_slack: float = 1e4
         

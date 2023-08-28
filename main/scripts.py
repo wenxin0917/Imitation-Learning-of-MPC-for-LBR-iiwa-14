@@ -14,13 +14,10 @@ from utils.plotting import plot_circle_xyz,plot_torque,plot_q_dq
 
 model = Symbolic_model()
 
-x = np.load("/circle_state_final.npy")
-u = np.load("/circle_torque_final.npy")
-circle = np.loadtxt("/200circle_xy0.1_ee.txt",delimiter=',')
-y = np.load("/circle_output_final.npy")
-t = np.arange(0, len(x)) * 0.02
+x = np.load("expert_data/state_0.3.npy")
+u = np.load("expert_data/action_0.3.npy")
 
-
-plot_circle_xyz(t,y,circle)
-plot_torque(t,u)
-plot_q_dq(t,y)
+for i in range(len(u)):
+    u_single = u[i,:,:].reshape(-1,7)
+    t = np.arange(0, len(u_single)+1) * 0.05
+    plot_torque(t,u_single)
