@@ -210,7 +210,7 @@ class MPC:
             ocp.cost.Zu = np.array([options.speed_slack]*7)
         
         # solver options
-        ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'  # FULL_CONDENSING_QPOASES
+        ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'  # FULL_CONDENSING_QPOASES # PARTIAL_CONDENSING_HPIPM
         ocp.solver_options.qp_solver_cond_N = int(options.n * options.condensing_relative)
         ocp.solver_options.hessian_approx = 'GAUSS_NEWTON'
         ocp.solver_options.integrator_type = 'IRK'
@@ -250,11 +250,16 @@ class MPC:
         
         self.debug_time.append(self.acados_ocp_solver.get_stats("time_tot")[0])
         if status != 0 and status != 2:
-            raise RuntimeError('acados returned status {} in time step {}.'.format(status, self.iteration_conuter))
-        
-        # get solution
-        u = self.acados_ocp_solver.get(0, "u")
+            u = np.zeros((self.nu,))
+            print("no optimal solution")
+            # raise RuntimeError('acados returned status {} in time step {}.'.format(status, self.iteration_conuter))
+            
+        else:  
+            # get solution
+            u = self.acados_ocp_solver.get(0, "u")
+            
         self.iteration_conuter += 1
+        
         return u
         
         

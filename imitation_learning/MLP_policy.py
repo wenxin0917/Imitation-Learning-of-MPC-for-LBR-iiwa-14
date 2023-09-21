@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.optim.lr_scheduler import StepLR
 
 class MLPPolicy(nn.Module):
     
@@ -23,11 +24,14 @@ class MLPPolicy(nn.Module):
 
         self.mlp.append(nn.Linear(size, output_dim)) #output layer
         self.mlp.append(nn.Tanh())
+        output_scales = [320, 320, 176, 176, 110, 40, 40]
+        self.output_scales = nn.Parameter(torch.tensor(output_scales, dtype=torch.float32))
         
         # loss and optimizer
         if self.training:
             self.loss_fn = nn.MSELoss()
             self.optimizer = torch.optim.Adam(self.parameters(),lr)
+            
         
         self.to(self.device) # send the model to the device
         
@@ -35,6 +39,7 @@ class MLPPolicy(nn.Module):
     def forward(self,obs):
         for layer in self.mlp:
             obs = layer(obs)
+        obs = obs * self.output_scales
         return obs
     
     # save the model's learnable parameters to a file, include the name and tensor of the parameters
@@ -68,3 +73,7 @@ class MLPPolicy(nn.Module):
         # print("loss_in_batch_size:", loss.item())
         return loss.item()  
     
+    def compute_loss(self,observations,actions):
+        predicted_actions = self(torch.Tensor(observations).to(self.device))
+        loss = self.loss_fn(predicted_actions, torch.Tensor(actions).to(self.device))
+        return loss.item()

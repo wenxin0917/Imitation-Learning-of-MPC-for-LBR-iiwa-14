@@ -3,67 +3,57 @@ import numpy as np
 import gym
 import os
 
+from expert_data.generate_expert import generate_expert_data_one_step
 from utils import *
 
 class ReplayBuffer(object):
     
     def __init__(self, max_size=1e6):
+        
         self.max_size = max_size
-        
-        # store each rollout
-        self.paths = []
-        
         # store (concatenated) component arrays from each rollout
         self.obs = None
         self.acs = None
-        self.rews = None
-        self.next_obs = None
-        self.terminals = None
         
-    def _len_(self):
+    def __len__(self):
         if self.obs is not None:
             return self.obs.shape[0]
         else:
             return 0
     
     
-    def add_rollouts(self, paths, concat_rew=True):
-
-        # add new rollouts into our list of rollouts, transfer the data in paths into self.paths
-        for path in paths:
-            self.paths.append(path)
-
-        # convert new rollouts into their component arrays, and append them onto our arrays
-        observations, actions, rewards, next_observations, terminals = convert_listofrollouts(paths, concat_rew)
+    def add_data(self, state, expert_action):
+        """
+        Add (state, expert action) pair to the data buffer.
+        """
         
-        
-        if self.obs is None:
-            self.obs = observations[-self.max_size:]
-            self.acs = actions[-self.max_size:]
-            self.rews = rewards[-self.max_size:]
-            self.next_obs = next_observations[-self.max_size:]
-            self.terminals = terminals[-self.max_size:]
-        else:
-            self.obs = np.concatenate([self.obs, observations])[-self.max_size:]
-            self.acs = np.concatenate([self.acs, actions])[-self.max_size:]
-            if concat_rew:
-                self.rews = np.concatenate([self.rews, rewards])[-self.max_size:]
-            else:
-                if isinstance(rewards, list):
-                    self.rews += rewards
-                else:
-                    self.rews.append(rewards)
-                self.rews = self.rews[-self.max_size:]
-            self.next_obs = np.concatenate([self.next_obs, next_observations])[-self.max_size:]
-            self.terminals = np.concatenate([self.terminals, terminals])[-self.max_size:]
+        if self.acs is None:
+            # initialize buffer
+            self.obs = state
+            self.acs = expert_action
             
-    def sample_random_data(self, batch_size):
-        assert self.obs.shape[0] == self.acs.shape[0] == self.rews.shape[0] == self.next_obs.shape[0] == self.terminals.shape[0]
+        else:
+            # generate new training data
+            new_expert_action,new_state= generate_expert_data_one_step(state)
+            self.obs = np.concatenate([self.obs, new_state], axis=0)
+            self.acs = np.concatenate([self.acs, new_expert_action], axis=0)
+
+    def get_data(self):
+        """
+        Get the stored data from the buffer.
+        """
+        return self.obs, self.acs
         
-        indices = np.random.permutation(len(self))[:batch_size]
-        return self.obs[indices], self.acs[indices], self.rews[indices], self.next_obs[indices], self.terminals[indices]
+if __name__ == '__main__':
     
-    
-    
-    def sample_recent_data(self, batch_size=1):
-        return self.obs[-batch_size:], self.acs[-batch_size:], self.rews[-batch_size:], self.next_obs[-batch_size:], self.terminals[-batch_size:]
+    new_buffer = ReplayBuffer()
+    # first time add data
+    new_state = np.load('expert_data/train_states.npy')
+    expert_action = np.load('expert_data/train_actions.npy')
+    new_buffer.add_data(new_state[:10,:], expert_action[:10,:])
+    states, expert_actions = new_buffer.get_data()
+    print(states.shape)
+    # second time add data
+    new_buffer.add_data(new_state[11:21,:], expert_action[11:21,:])
+    states, expert_actions = new_buffer.get_data()
+    print(states.shape)

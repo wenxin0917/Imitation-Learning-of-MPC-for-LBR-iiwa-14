@@ -11,6 +11,8 @@ class BCAgent:
         self.env = env
         self.params = params
         # actor/policy
+        
+        # initialize for BC 
         self.actor = MLPPolicy(
             self.params['ob_dim'],
             self.params['ac_dim'],
@@ -19,6 +21,15 @@ class BCAgent:
             self.params['device'],
             self.params['learning_rate']
         )
+        
+        
+        """
+        # load the trained bc model for Dagger training
+        self.actor = MLPPolicy(14,7,6,256,device='cpu',lr=0.001,training= True)
+        checkpoint = torch.load('training_logger/dagger1_policy_itr_999.pth')
+        self.actor.load_state_dict(checkpoint)
+        """
+        
         
         # replay buffer to store data
         self.replay_buffer = ReplayBuffer(
@@ -30,10 +41,12 @@ class BCAgent:
         loss =self.actor.update(ob_no,ac_na)
         return loss
     
-    def add_to_replay_buffer(self, paths):
-        self.replay_buffer.add_rollouts(paths)
-    # ??? where can I get the paths???
+    def compute_loss(self,ob_no,ac_na):
+        
+        # update/fit actor/policy
+        loss =self.actor.compute_loss(ob_no,ac_na)
+        return loss
     
-    
-    def sample(self, batch_size):
-        return self.replay_buffer.sample_random_data(batch_size)
+    def get_action(self,obs):
+        # query actor/policy for action given observation(s)
+        return self.actor.get_action(obs)

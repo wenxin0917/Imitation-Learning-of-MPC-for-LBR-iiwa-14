@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/main.cpp
+iostream
+-
+cmath
+-
+map
+-
+pinocchio/algorithm/joint-configuration.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/joint-configuration.hpp
+pinocchio/algorithm/frames.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/frames.hpp
+pinocchio/algorithm/kinematics.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/kinematics.hpp
+pinocchio/algorithm/rnea.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/rnea.hpp
+pinocchio/algorithm/aba.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/aba.hpp
+pinocchio/parsers/urdf.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/parsers/urdf.hpp
+pinocchio/algorithm/joint-configuration.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/algorithm/joint-configuration.hpp
+pinocchio/autodiff/casadi.hpp
+/home/wenxin/Desktop/SAIL/7DOF/cpp/src/pinocchio/autodiff/casadi.hpp
+casadi/casadi.hpp
+-
+

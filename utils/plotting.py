@@ -11,9 +11,10 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
     q = y[:, :7]
     dq = y[:, 7:14]
     pee = y[:, 14:]
-
-    q_lbls = [fr'$q_{k}$ [rad]' for k in range(1, 8)]
     do_plot = True
+    """
+    q_lbls = [fr'$q_{k}$ [rad]' for k in range(1, 8)]
+    
     if axs is None:
         _, axs_q = plt.subplots(7, 1, sharex=True, figsize=(6, 8))
     else:
@@ -33,7 +34,8 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         ax.set_ylabel(dq_lbls[k])
         ax.grid(alpha=0.5)
     plt.tight_layout()
-
+    """
+    
     pee_lbls = [r'$p_{ee,x}$ [m]', r'$p_{ee,y}$ [m]', r'$p_{ee,z}$ [m]']
     _, axs_pee = plt.subplots(3, 1, sharex=True, figsize=(6, 8))
     for k, ax in enumerate(axs_pee.reshape(-1)):
@@ -92,8 +94,9 @@ def plot_torque(t,u):
     u_lbls = [fr'$u_{k}$ [N*m]' for k in range(1, 8)]
     _, axs_u = plt.subplots(7, 1, sharex=True, figsize=(6, 8))
     for k, ax in enumerate(axs_u.reshape(-1)):
-        ax.plot(t[:-1], u[:, k])
+        ax.step(t[:-1], u[:, k])
         ax.set_ylabel(u_lbls[k])
+        ax.set_xlabel('time')
         ax.grid(alpha=0.5)
     plt.tight_layout()
     plt.show()

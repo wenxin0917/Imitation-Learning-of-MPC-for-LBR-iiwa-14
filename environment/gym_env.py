@@ -35,7 +35,7 @@ class iiwa14EnvOptions:
             self.x_end = x_end
       
         if sim_time is None:
-            self.sim_time = 3 
+            self.sim_time = 2 
         else:
             self.sim_time = sim_time
             

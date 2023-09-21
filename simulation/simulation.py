@@ -31,7 +31,7 @@ class SimulatorOptions:
             self.contr_input_state = contr_input_state
         
         if dt is None:
-            self.dt = 0.01
+            self.dt = 0.05
         else:
             self.dt = dt
 
@@ -92,7 +92,7 @@ class Simulator:
         
         return robot.odefun(x,tau)
     
-    def integrator_step(self,x,u,dt) -> np.ndarray:
+    def integrator_step(self,x,u) -> np.ndarray:
         # x 1D , u 1D , dt step size of the integrator
         if self.integrator in ['collocation', 'cvodes']:
             x_next = np.array(self.F(x, u)).flatten()
@@ -102,14 +102,14 @@ class Simulator:
     
     def step(self,input_tau: np.ndarray) -> np.ndarray:
         self.u[[self.k], :] = input_tau
-        x_next = self.integrator_step(self.x[[self.k], :], self.u[[self.k], :], self.opts.dt)
+        x_next = self.integrator_step(self.x[[self.k], :], self.u[[self.k], :])
         self.x[self.k + 1, :] = x_next
         self.y[self.k + 1, :] = self.robot.output(self.x[[self.k + 1], :].T).flatten() 
         # self.y[self.k + 1, :] = (self.robot.output(self.x[[self.k + 1], :].T).flatten() +
         #                         multivariate_normal(np.zeros(self.robot.ny), self.opts.R))
         self.k += 1
         return self.x[[self.k], :].T
-    
+        
     def simulate(self, x0, n_iter: int = None):
         state = self.reset(x0, n_iter)
         nq = self.robot.nq
