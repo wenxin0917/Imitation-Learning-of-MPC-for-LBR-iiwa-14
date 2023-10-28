@@ -3,7 +3,6 @@ import numpy as np
 import gym
 import os
 
-from expert_data.generate_expert import generate_expert_data_one_step
 from utils import *
 
 class ReplayBuffer(object):
@@ -33,10 +32,8 @@ class ReplayBuffer(object):
             self.acs = expert_action
             
         else:
-            # generate new training data
-            new_expert_action,new_state= generate_expert_data_one_step(state)
-            self.obs = np.concatenate([self.obs, new_state], axis=0)
-            self.acs = np.concatenate([self.acs, new_expert_action], axis=0)
+            self.obs = np.concatenate([self.obs, state], axis=0)
+            self.acs = np.concatenate([self.acs, expert_action], axis=0)
 
     def get_data(self):
         """

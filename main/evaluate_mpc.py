@@ -28,6 +28,8 @@ R_DQ_sim = np.array([0] * 7)
 R_PEE_sim = np.array([0] * 3) 
 
 CNTR_INPUT_STATES = 'real'
+
+
   
 
 if __name__ == "__main__":
@@ -81,18 +83,18 @@ if __name__ == "__main__":
     x , u , y = env.simulator.x, env.simulator.u, env.simulator.y
     
     # save the trajectoty with wall 0.577x - 2.485 -y >0
-    np.save("/torque_single_point_with_wall_30.npy", u)  
-    np.save("/state_single_point_with_wall_30.npy", x)    
-    np.save("/output_single_point_with_wall_30.npy", y)
+    # np.save("mpc_result/torque_single_point_with_wall_30.npy", u)  
+    # np.save("mpc_result/state_single_point_with_wall_30.npy", x)    
+    # np.save("mpc_result/output_single_point_with_wall_30.npy", y)
     
     # save the trajectoty with wall y< 0.4
-    # np.save("/torque_single_point_with_wall_y.npy", u)
-    # np.save("/state_single_point_with_wall_y.npy", x)
-    #np.save("/output_single_point_with_wall_y.npy", y)
+    # np.save("mpc_result/torque_single_point_with_wall_y.npy", u)
+    # np.save("mpc_result/state_single_point_with_wall_y.npy", x)
+    # np.save("mpc_result/output_single_point_with_wall_y.npy", y)
     
     # save the trajectoty without wall
-    # np.save("/torque_single_point_without_wall.npy", u)  
-    # np.save("/state_single_point_without_wall.npy", x) 
-    # np.save("/output_single_point_without_wall.npy", y))    
+    # np.save("mpc_result/torque_single_point_without_wall.npy", u)  
+    #np.save("mpc_result/state_single_point_without_wall.npy", x) 
+    #np.save("mpc_result/output_single_point_without_wall.npy", y)   
     t = np.arange(0, env.max_intg_steps +1) * env.dt
     plot_measurements(t, y, pee_ref)

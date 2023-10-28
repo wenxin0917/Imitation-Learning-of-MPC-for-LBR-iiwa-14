@@ -5,6 +5,7 @@ import numpy as np
 import gym
 import os
 import torch
+import random
 
 from utils import *
 from imitation_learning.logger import Logger
@@ -12,7 +13,7 @@ from environment.gym_env import iiwa14Env,iiwa14EnvOptions
 from imitation_learning.bc_agent import BCAgent
 from imitation_learning.replay_buffer import ReplayBuffer
 import matplotlib.pyplot as plt
-
+from expert_data.generate_expert import *
 
 
 class RL_Trainer(object):
@@ -54,25 +55,28 @@ class RL_Trainer(object):
         validation_loss = []
         # init vars at beginning of training
         self.start_time = time.time()
-        scheluer = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.9)
+        scheluer = torch.optim.lr_scheduler.ExponentialLR(optimizer,gamma=0.9)
 
         for itr in range(n_iter):
             print("\n\n********** Iteration %i ************"%itr)
             self.log_metrics = True
             # train agent (using sampled data from replay buffer)
             total_loss= self.train_agent_bc(initial_expert_state,initial_expert_action) 
+            
+            # print("[EPOCH]: %i, [MSE LOSS]: %.6f" % (itr, total_loss))
+            # training_loss.append(total_loss)
             print("[EPOCH]: %i, [MSE LOSS]: %.6f" % (itr, total_loss / self.params['num_agent_train_steps_per_iter']))
             training_loss.append(total_loss / self.params['num_agent_train_steps_per_iter'])
             validation_loss.append(self.validation_process())
             scheluer.step()
             
         print("\nSaving agent's actor...")
-        self.agent.actor.save(self.params['logdir'] + '/bc26_policy_itr_'+str(itr)+'.pth')
+        self.agent.actor.save(self.params['logdir'] + '/try2_policy_itr_'+str(itr)+'.pth')
 
         # save the list to a file
-        with open('training_logger/training_loss_bc_26.pkl','wb') as file:
+        with open('training_logger/training_loss_try_2.pkl','wb') as file:
             pickle.dump(training_loss,file)
-        with open('training_logger/validation_loss_bc_26.pkl','wb') as file:
+        with open('training_logger/validation_loss_try_2.pkl','wb') as file:
             pickle.dump(validation_loss,file)
             
             
@@ -107,7 +111,7 @@ class RL_Trainer(object):
         validation_loss = []
         # init vars at beginning of training
         self.start_time = time.time()
-        scheluer = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.9)
+        scheluer = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.9)
 
         for itr in range(n_iter):
             
@@ -129,13 +133,13 @@ class RL_Trainer(object):
             
         # save policy
         print("\nSaving agent's actor...")
-        self.agent.actor.save(self.params['logdir'] + '/dagger3_policy_itr_'+str(itr)+'.pth')
+        self.agent.actor.save(self.params['logdir'] + '/try2_policy_itr_'+str(itr)+'.pth')
         # print("current learning rate is : ",optimizer.param_groups[0]["lr"])
             
         # save the list to a file
-        with open('training_logger/training_loss_dagger_3.pkl','wb') as file:
+        with open('training_logger/training_loss_try_2.pkl','wb') as file:
             pickle.dump(training_loss,file)
-        with open('training_logger/validation_loss_dagger_3.pkl','wb') as file:
+        with open('training_logger/validation_loss_try_2.pkl','wb') as file:
             pickle.dump(validation_loss,file)
             
     
@@ -150,8 +154,8 @@ class RL_Trainer(object):
         else:
             self.params['num_agent_train_steps_per_iter'] = (state.shape[0] // self.params['batch_size']) + 1
         
-        if iteration ==0 or (iteration+1) % 50 == 0:
-            self.mix_nn_output_with_expert(self.agent,action,state,iteration)
+        if (iteration+1) % 50 == 0:
+            self.mix_nn_output_with_expert(self.agent,iteration)
             state,action = self.buffer.get_data()
             print("current training data size: ",state.shape[0])
         # add new training data
@@ -188,41 +192,39 @@ class RL_Trainer(object):
             # Use the sampled validation data for computing loss
             total_loss += self.agent.compute_loss(ob_batch, ac_batch)
 
+        # return total_loss
         return total_loss / num_agent_validation_steps
      
-    
-    
 
-    def mix_nn_output_with_expert(self, current_policy, expert_output,observation,itr):
+    def mix_nn_output_with_expert(self,agent,itr):
         
         print("\nMixing current policy with expert policy to add more data")
 
         # 20 is the number of iterations we want to mix the expert policy with our policy
         # 20 = 500(total_iteration) / 25
-        
-        if itr+50 >=999:
+        if itr+50 > 2000 or itr < 300:
             return
-        else:
-            t = (itr+50) / 50 
-            mixture_coefficient = t / 20
-            
-        # mixture_coefficient = 1/30
-        # relabel collected obsevations (from our policy) with labels from an expert policy
-           
-        # Randomly choose 200 indices without replacement
-        chosen_indices = np.random.choice(observation.shape[0], size=200, replace=False)
-        new_observation = observation[chosen_indices, :]
-        mix_output = mixture_coefficient*(current_policy.get_action(new_observation)) + (1-mixture_coefficient)*expert_output[chosen_indices, :]
-        added_new_state = np.zeros((mix_output.shape[0],14))
-        for i in range(mix_output.shape[0]):
-            added_new_state[i,:] = self.env.simulator.integrator_step(observation[i,:],mix_output[i,:],).reshape(-1,14)
+        # else:
+            # if itr == 0:   
+                # t =  1
+            # else:
+        t = (itr+51)/50
+        mixture_coefficient = t / 40
         
-        # print(added_new_state)
-        # print(added_new_state.shape)
-        self.buffer.add_data(added_new_state,None)
-        new_states,new_actions = self.buffer.get_data()
-        np.save("expert_data/dagger_train_states_3.npy",new_states)
-        np.save("expert_data/dagger_train_actions_3.npy",new_actions)
+        q_range = np.deg2rad([170,120,170,120,170,120,175])
+        alpha = 0.3   
+        np.random.seed(int(t))
+        for i in range(100):
+            x_0 = sample_rand_initial_position(alpha,q_range)
+            print("initial state",x_0)
+            explored_states, explored_actions,explored_output = generate_expert_data_with_NN(mixture_coefficient,agent,x_0)
+
+            if np.all(explored_actions == np.zeros((7,))):
+                continue
+            else:   
+                self.buffer.add_data(explored_states,explored_actions)
+                new_states,new_actions = self.buffer.get_data()
+                np.save("expert_data/dagger_states_2.npy",new_states)
+                np.save("expert_data/dagger_actions_2.npy",new_actions)
 
         return 
-        # return added_new_state

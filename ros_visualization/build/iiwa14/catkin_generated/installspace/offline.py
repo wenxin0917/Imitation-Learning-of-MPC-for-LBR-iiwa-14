@@ -17,7 +17,7 @@ def trajectory_display(states):
     joint_publisher = rospy.Publisher('/joint_states', JointState, queue_size=10)
 
     # Set the loop rate
-    rate = rospy.Rate(5) 
+    rate = rospy.Rate(15) 
     
     # create the JointState message
     joint_state = JointState()
@@ -42,19 +42,25 @@ if __name__ == '__main__':
         # Navigate one level up to reach the iiwa14 package directory
         pkg_dir = os.path.dirname(script_dir)
         
-        # Construct the path to the .npy file inside the data directory
-        # file_path = os.path.join(pkg_dir, 'data', 'state_single_point_with_wall_30.npy')
+        
+        # load the single point reference .npy file
+        # file_path = os.path.join(pkg_dir, 'data', 'state_single_point_without_wall.npy')
         # states = np.load(file_path)
         
-        # load the circle joint reference .txt file
-        file_path = os.path.join(pkg_dir, 'data', 'circle_state386_9.npy')
+        # load the single point reference with straight wall .npy file
+        # file_path = os.path.join(pkg_dir, 'data', 'state_single_point_with_wall_0.npy')
+        # states = np.load(file_path)
+        
+        # Construct the path to the .npy file inside the data directory
+        file_path = os.path.join(pkg_dir, 'data', 'state_single_point_with_wall_30.npy')
         states = np.load(file_path)
+        
+        # load the circle joint reference .txt file
+        # file_path = os.path.join(pkg_dir, 'data', 'circle_state_final.npy')
+        # states = np.load(file_path)
         
         
         # load the circle joint MPC result file
-        # file_path = os.path.join(pkg_dir, 'data', 'N50.npy')
-        # states = np.load(file_path)
-        # Call the function to set initial position and publish the torques
         trajectory_display(states)
     except rospy.ROSInterruptException:
         pass

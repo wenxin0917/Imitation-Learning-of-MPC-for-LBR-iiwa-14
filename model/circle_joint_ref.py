@@ -15,10 +15,10 @@ model_folder = 'model/urdf/'
 urdf_file = 'iiwa14.urdf'
 urdf_path = os.path.join(model_folder,urdf_file)
 model = pinocchio.buildModelFromUrdf(urdf_path)
-  = model.create()
+data= model.create()
 
-pee_ref = np.loadtxt('/200circle_xy0.1.txt',delimiter=',')
-pee_vel_ref = np.loadtxt('/200circle_xy0.1_vel.txt',delimiter=',')
+pee_ref = np.loadtxt('mpc_result/200circle_xy0.1.txt',delimiter=',')
+pee_vel_ref = np.loadtxt('mpc_result/200circle_xy0.1_vel.txt',delimiter=',')
 q = np.array([[0, -1.58, 0, -1.58, 0, 0, 0]])
 q_ref = np.repeat(q,pee_ref.shape[0],axis=0)
 joint_velocities = np.zeros((pee_ref.shape[0],7))
@@ -33,9 +33,9 @@ for j in range(pee_ref.shape[0]):
     q = pinocchio.neutral(model)
     i = 0 
     while True:
-        pinocchio.forwardKinematics(model,,q)
+        pinocchio.forwardKinematics(model,data,q)
         # the difference between the current position and the desired position
-        dMi = oMdes.actInv(.oMi[JOINT_ID]) 
+        dMi = oMdes.actInv(data.oMi[JOINT_ID]) 
         # gives the difference between the current and desired poses in a vector form
         err = pinocchio.log(dMi).vector 
         if norm(err) < eps:
@@ -44,7 +44,7 @@ for j in range(pee_ref.shape[0]):
         if i >= IT_MAX:
             success = False
             break
-        J = pinocchio.computeJointJacobian(model,,q,JOINT_ID)
+        J = pinocchio.computeJointJacobian(model,data,q,JOINT_ID)
         v = - J.T.dot(solve(J.dot(J.T) + damp * np.eye(6), err))
         q = pinocchio.integrate(model,q,v*DT)
         q_2pi = (np.array(q) + np.pi) % (2 * np.pi) - np.pi
@@ -62,10 +62,10 @@ for j in range(pee_ref.shape[0]):
     
     
     # calculate the joint velocities
-    J = pinocchio.computeJointJacobian(model,,q_ref[j,:],JOINT_ID)
+    J = pinocchio.computeJointJacobian(model,data,q_ref[j,:],JOINT_ID)
     pseudo_inverse_J = np.linalg.pinv(J)
     joint_velocities[j,:] = np.dot(pseudo_inverse_J,pee_vel_ref[j,:])
 
 # print(q_ref)
-np.savetxt('/200circle_joint_xy0.1.txt', q_ref, delimiter=',', fmt='%f')
-np.savetxt('/200circle_joint_xy0.1_vel.txt', joint_velocities, delimiter=',', fmt='%f')
+np.savetxt('mpc_result/200circle_joint_xy0.1.txt', q_ref, delimiter=',', fmt='%f')
+np.savetxt('mpc_result/200circle_joint_xy0.1_vel.txt', joint_velocities, delimiter=',', fmt='%f')

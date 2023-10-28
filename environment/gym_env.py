@@ -50,7 +50,7 @@ class iiwa14EnvOptions:
             self.contr_input_state = contr_input_state
             
         self.render_mode = None
-        self.maximum_torques: np.ndarray = np.array([320,320,176,176,110,40,40])
+        self.maximum_torques: np.ndarray = np.array([50,100,10,50,5,5,1])
         self.goal_dist_euclid: float = 0.01
         self.goal_min_time: float = 1 
 
@@ -113,6 +113,32 @@ class iiwa14Env(gym.Env):
         info = {}
         return(observation, reward, done, info)
     
+    def step_mix_with_policy(self,a,mixture_ratio,agent)-> Tuple[np.ndarray, float, bool, dict]:
+        obs = self._state[:,-1].reshape(1,14)
+        print(obs)
+        predictions = agent.get_action(obs)
+        predictions = predictions
+        
+        self._state = self.simulator.mix_step(a,predictions.reshape(1,7),mixture_ratio)
+        print(self._state)
+        self.no_intg_steps += 1
+        
+        # define reward as Euclidian distance to goal
+        pee_current = self.sim_model.pee(self._state[:int(self.sim_model.nq)]) 
+        dist = np.linalg.norm(pee_current - self.pee_final,2)  
+        reward = -dist * self.options.dt
+        
+        # check if goal is reached
+        done = bool(self.terminal(dist))
+        
+        observation = self._state[:,0]
+        print(observation)
+        
+        info = {}
+        return(observation, reward, done, info)
+    
+    
+    
     def terminal(self,dist:float):
         if dist < self.options.goal_dist_euclid:
             self.goal_dist_counter += 1
@@ -131,12 +157,14 @@ class iiwa14Env(gym.Env):
         q = []
         q_range = np.deg2rad([170,120,170,120,170,120,175])
         alpha = 0.3
+        np.random.seed(3)
         for limit in q_range:
             single_joint = np.random.uniform(alpha * limit, -alpha * limit)
             q.append(single_joint)
         q = np.array(q).reshape(7,1)
         dq = np.zeros((7,1))
         x = np.vstack((q,dq))
+        print("initial_state:",x)
         return x  
     
 if __name__ == "__main__":

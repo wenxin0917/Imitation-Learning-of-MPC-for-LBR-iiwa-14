@@ -21,10 +21,11 @@ class MLPPolicy(nn.Module):
         for h in range(n_layers - 1): #additional hidden layers
             self.mlp.append(nn.Linear(size, size))
             self.mlp.append(nn.ReLU())
+            self.mlp.append(nn.LayerNorm(size))
 
         self.mlp.append(nn.Linear(size, output_dim)) #output layer
         self.mlp.append(nn.Tanh())
-        output_scales = [320, 320, 176, 176, 110, 40, 40]
+        output_scales = [50,100,10,50,5,5,1]
         self.output_scales = nn.Parameter(torch.tensor(output_scales, dtype=torch.float32))
         
         # loss and optimizer

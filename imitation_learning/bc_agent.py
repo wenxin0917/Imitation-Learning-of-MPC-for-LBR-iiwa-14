@@ -12,6 +12,7 @@ class BCAgent:
         self.params = params
         # actor/policy
         
+        """
         # initialize for BC 
         self.actor = MLPPolicy(
             self.params['ob_dim'],
@@ -21,14 +22,14 @@ class BCAgent:
             self.params['device'],
             self.params['learning_rate']
         )
-        
-        
         """
+        
+        
         # load the trained bc model for Dagger training
         self.actor = MLPPolicy(14,7,6,256,device='cpu',lr=0.001,training= True)
-        checkpoint = torch.load('training_logger/dagger1_policy_itr_999.pth')
+        checkpoint = torch.load('training_logger/bc4_policy_itr_999.pth')
         self.actor.load_state_dict(checkpoint)
-        """
+        
         
         
         # replay buffer to store data

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     pkg_dir = os.path.dirname(script_dir)
     
-    file_path = os.path.join(pkg_dir, 'data', '50circle_xy0.1_ee.txt')
+    file_path = os.path.join(pkg_dir, 'data', '200circle_xy0.1_ee.txt')
     points = np.loadtxt(file_path,delimiter=',')
     
     try:

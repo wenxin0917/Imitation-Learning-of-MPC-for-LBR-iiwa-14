@@ -4,7 +4,7 @@
     
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-    <node pkg="iiwa14" type="offline.py" name="trajectory_display" output="screen" /> 
+     <node pkg="iiwa14" type="offline.py" name="robot_trajectory_display" output="screen" />
 
     <node name="rviz" pkg="rviz" type="rviz"/>
 

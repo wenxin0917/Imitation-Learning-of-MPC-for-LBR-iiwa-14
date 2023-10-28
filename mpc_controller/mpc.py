@@ -38,7 +38,7 @@ self.Pn = np.diagflat(np.array([1]*3))* 1e4
 
 # define penalty element of Q for state x 
 Q_q = 0.1
-Q_dq = 5e1
+Q_dq = 0.01
 # define penalty element of Qn for terminal state x
 Q_qe = 5e2
 Q_dqe = 5e1
@@ -47,10 +47,10 @@ class MpcOptions:
     def __init__(self, tf: float=2, n: int=30) -> None:
         self.n : int = n
         self.tf : float = tf
-        self.nlp_solver_max_iter : int = 100
+        self.nlp_solver_max_iter : int = 50
         self.condensing_relative: float=1
         # define the wall constraint
-        self.wall_0deg_constraint_on: bool = False
+        self.wall_0deg_constraint_on: bool = True
         self.wall_axis: int = 1
         self.wall_value: float = 0.4
         self.wall_pos_side: bool = False

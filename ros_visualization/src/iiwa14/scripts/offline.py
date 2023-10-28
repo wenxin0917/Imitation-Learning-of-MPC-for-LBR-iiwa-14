@@ -44,7 +44,7 @@ if __name__ == '__main__':
         
         
         # load the single point reference .npy file
-        # file_path = os.path.join(pkg_dir, 'data', 'state_single_point_without_wall_30.npy')
+        # file_path = os.path.join(pkg_dir, 'data', 'state_single_point_without_wall.npy')
         # states = np.load(file_path)
         
         # load the single point reference with straight wall .npy file

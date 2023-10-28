@@ -109,7 +109,17 @@ class Simulator:
         #                         multivariate_normal(np.zeros(self.robot.ny), self.opts.R))
         self.k += 1
         return self.x[[self.k], :].T
-        
+    
+    
+    def mix_step(self,expert_tau,policy_tau,mixture_ratio) -> np.ndarray:
+        self.u[[self.k], :] = (1-mixture_ratio)* expert_tau + mixture_ratio*policy_tau
+        x_next = self.integrator_step(self.x[[self.k], :], self.u[[self.k], :])
+        self.x[self.k + 1, :] = x_next
+        self.y[self.k + 1, :] = self.robot.output(self.x[[self.k + 1], :].T).flatten() 
+        self.k += 1
+        return self.x[[self.k], :].T
+    
+    
     def simulate(self, x0, n_iter: int = None):
         state = self.reset(x0, n_iter)
         nq = self.robot.nq

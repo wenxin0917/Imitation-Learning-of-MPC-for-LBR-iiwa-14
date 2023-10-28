@@ -80,66 +80,85 @@ def sample_rand_initial_position(alpha:float,q_range:np.array):
         x = np.vstack((q,dq))
         return x
     
-def generate_expert_data_one_step(state):
-    """
-    Generate expert data for DAgger imitation learning.
-    """
-    # create output array
-    expert_action = np.zeros((state.shape[0],7))
+def generate_expert_data_with_NN(mixture_ratio,agent,x_0):
     
+    """
+    Mix policy.
+    """
     # MPC parameters
     DT = 0.05 # sampling time
+    N_ITER = 40
     horizon_n = 5 # the same as the parameter in generate_expert_data
     x_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37,0,0,0,0,0,0,0]).reshape(14,1)
+    x_0 = x_0.reshape(14,1)
+    R_Q_sim = np.array([0] * 7)
+    R_DQ_sim = np.array([0] * 7)
+    R_PEE_sim = np.array([0] * 3) 
+
+    CNTR_INPUT_STATES = 'real'
+
+    # create environment
+    env_opts = iiwa14EnvOptions(
+        dt = DT,
+        x_start = x_0,
+        x_end = x_ref,
+        sim_time = N_ITER * DT,
+        sim_noise_R = np.diag([*R_Q_sim, *R_DQ_sim, *R_PEE_sim]),
+        contr_input_state = CNTR_INPUT_STATES
+    )
+    env = iiwa14Env(env_opts)
     
     # controller
     control_model = Symbolic_model()
     mpc_opts = MpcOptions(tf=DT*horizon_n, n=horizon_n)
-    deleted_index = []
-    x_0 = x_ref.reshape(14,1)
     pee_0 = control_model.forward_kinemetics(x_0[0:7])
-    # MPC_controller = MPC(control_model,x_0, pee_0, mpc_opts)
+    
     # assert mpc_opts.get_sample_time() == DT
     
     # provide reference for mpc controller
     pee_ref = control_model.forward_kinemetics(x_ref[0:7])
     u_ref = control_model.gravity_torque(x_ref[0:7]) 
-    # MPC_controller.set_reference_point(x_ref, pee_ref, u_ref)
-    for i in range(state.shape[0]):
-        # start_time = time.time()
-        if i % 20 == 0:
-            MPC_controller = MPC(control_model,x_0, pee_0, mpc_opts)
-            MPC_controller.set_reference_point(x_ref, pee_ref, u_ref)
-        
-        qk , dqk = np.expand_dims(state[i,:7], 1), np.expand_dims(state[i,7:], 1)
-        u = MPC_controller.compute_torques(q=qk, dq=dqk,t=None)
-        
-        if np.all(u == np.zeros((7,))):
-            deleted_index.append(i)
-            print("The deleted state is ",state[i,:])
-        
-        expert_action[i,:] = u.reshape(-1,7)
-        
-        
-    if len(deleted_index) != 0:
-        expert_action = np.delete(expert_action,deleted_index,axis=0)
-        state = np.delete(state,deleted_index,axis=0)
-            
-    return expert_action,state
+    MPC_controller = MPC(control_model,x_0, pee_0, mpc_opts)
+    MPC_controller.set_reference_point(x_ref, pee_ref, u_ref)
+    
+    # simulation
+    nq = control_model.nq
+    state = env.reset()
+    qk , dqk = np.expand_dims(state[0:nq], 1), np.expand_dims(state[nq:], 1)
+    
+    # start_time = time.time()
+    for i in range(env.max_intg_steps):
+        a = MPC_controller.compute_torques(q=qk, dq=dqk,t = i*DT)
+        print("the torque is ",a)
+        if np.all(a == np.zeros((7,))):
+            return a,a,a
+        # print("yes")
+        state, reward, done, info = env.step_mix_with_policy(a,mixture_ratio,agent)
+        qk, dqk = np.expand_dims(state[0:nq], 1), np.expand_dims(state[nq:], 1 )
+        if done:
+            break
+    print("succeed collecting new states")
+    x_mpc = env.simulator.x
+    # print(x_mpc.shape)
+    x_mpc = np.delete(x_mpc,40,axis=0)
+    x , u , y = x_mpc, env.simulator.u, env.simulator.y       
+    return x,u,y
+
+    
 
 
 if __name__ == "__main__":
     
     
     # generate expert data for imitation learning
-    expert_data_state = np.zeros((400,41,14))
-    expert_data_action = np.zeros((400,40,7))
-    expert_data_output= np.zeros((400,41,17))
+    expert_data_state = np.zeros((10,41,14))
+    expert_data_action = np.zeros((10,40,7))
+    expert_data_output= np.zeros((10,41,17))
     q_range = np.deg2rad([170,120,170,120,170,120,175])
     alpha = 0.3
-    np.random.seed(4)
+    np.random.seed(10)
     used_initial_position = set()
-    for i in range(400):
+    for i in range(10):
         x_0 = sample_rand_initial_position(alpha,q_range)
         x_0_tuple = tuple(x_0.flatten())
         if x_0_tuple not in used_initial_position:
@@ -148,7 +167,7 @@ if __name__ == "__main__":
             i= i-1
     used_initial_position_list = list(used_initial_position)
     
-    for i in range(400):
+    for i in range(10):
         x_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37,0,0,0,0,0,0,0]).reshape(14,1)
         x,u,y = generate_expert_data(5,np.array(used_initial_position_list[i]).reshape(14,1),x_ref)
         expert_data_state[i,:,:] = x
@@ -156,9 +175,9 @@ if __name__ == "__main__":
         expert_data_output[i,:,:] = y
         print("",i)
     
-    np.save('expert_data/5state_0.3.npy',expert_data_state)
-    np.save('expert_data/5action_0.3.npy',expert_data_action)
-    np.save('expert_data/5output_0.3.npy',expert_data_output)
+    np.save('expert_data/11state_0.3.npy',expert_data_state)
+    np.save('expert_data/11action_0.3.npy',expert_data_action)
+    np.save('expert_data/11output_0.3.npy',expert_data_output)
     
     """
     

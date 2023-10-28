@@ -24,9 +24,9 @@
     </link>
     
     <!-- attach the wall to the robot-->
-    <!-- change the rpy value to "0 0 0", the wall will be straight-->
+    <!-- change the rpy value to "0 0 0.523", the wall will be straight-->
     <joint name="world_wall_joint" type="fixed">
-      <origin xyz="5 0.4 0" rpy="0 0 0.523"/>
+      <origin xyz="5 0.42 0" rpy="0 0 0"/>
       <parent link="world"/>
       <child link="wall_link"/>
     </joint>
@@ -35,10 +35,10 @@
     <visual>
       <origin xyz="0 0.02 0.7" rpy="0 0 0"/>
       <geometry>
-        <box size="2 0.02 1.4"/>
+        <box size="1 0.02 1.4"/>
       </geometry>
       <material name="gray">
-        <color rgba="0.5 0.5 0.5 1"/>
+        <color rgba="0.4 0.4 0.4 1"/>
       </material>
     </visual>
     </link>

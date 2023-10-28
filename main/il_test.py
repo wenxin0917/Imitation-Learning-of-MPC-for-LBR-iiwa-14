@@ -1,12 +1,14 @@
 import torch
 import os
 import sys
+import random
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 from imitation_learning.MLP_policy import MLPPolicy
 from environment.gym_env import iiwa14EnvOptions,iiwa14Env
 from model.iiwa14_model import Symbolic_model
 import numpy as np
+from utils import *
 
 import matplotlib.pylab as plt
 
@@ -23,12 +25,13 @@ def plot_actions(predict_actions,expert_actions):
     plt.tight_layout()
     plt.show()
     
-def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, axs=None):
+def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None,expert_output = None,axs=None):
     # y output (1,17)
     # Parse measurements
     q = y[:, :7]
     dq = y[:, 7:14]
     pee = y[:, 14:]
+    expert_pee = expert_output[:,14:]
 
     q_lbls = [fr'$q_{k}$ [rad]' for k in range(1, 8)]
     do_plot = True
@@ -41,7 +44,7 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         ax.plot(t, q[:, k])
         ax.set_ylabel(q_lbls[k])
         ax.grid(alpha=0.5)
-    axs_q[2].set_xlabel('t [s]')
+    axs_q[6].set_xlabel('t [s]')
     plt.tight_layout()
 
     dq_lbls = [fr'$\dot q_{k}$ [rad/s]' for k in range(1, 8)]
@@ -50,41 +53,46 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         ax.plot(t, dq[:, k])
         ax.set_ylabel(dq_lbls[k])
         ax.grid(alpha=0.5)
+    axs_dq[6].set_xlabel('t [s]')
     plt.tight_layout()
 
     pee_lbls = [r'$p_{ee,x}$ [m]', r'$p_{ee,y}$ [m]', r'$p_{ee,z}$ [m]']
     _, axs_pee = plt.subplots(3, 1, sharex=True, figsize=(6, 8))
     for k, ax in enumerate(axs_pee.reshape(-1)):
         ax.plot(t, pee[:, k])
-
+        ax.plot(t, expert_pee[:, k],color='orange')
         ax.axhline(pee_ref[k], ls='--', color='red')
 
         ax.set_ylabel(pee_lbls[k])
         ax.grid(alpha=0.5)
+    axs_pee[2].set_xlabel('t [s]')
     plt.tight_layout()
     if do_plot:
         plt.show()            
             
 
 test_states = np.load('expert_data/test_states.npy')
+# test_states = np.delete(test_states,40,axis=1)
 test_data = test_states.reshape(-1,40,14)
-test_actions = np.load('expert_data/test_actions.npy')
-test_actions = test_actions.reshape(-1,40,7)
+# test_actions = np.load('expert_data/11action_0.3.npy')
+# test_actions = test_actions.reshape(-1,40,7)
+# expert_output = np.load('expert_data/11output_0.3.npy')
 reward = []
 x_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37,0,0,0,0,0,0,0]).reshape(14,1)
 
 # load the model
 loaded_model = MLPPolicy(14,7,6,256,device='cpu',lr=0.001,training= False)
-checkpoint = torch.load('training_logger/dagger2_policy_itr_1999.pth')
+checkpoint = torch.load('training_logger/dagger1_policy_itr_1999.pth')
 loaded_model.load_state_dict(checkpoint)
 
-# load the iiwa14 model 
+# load the iiwa14 model symbolic
 iiwa14_model = Symbolic_model()
 pee_ref = iiwa14_model.forward_kinemetics(x_ref[:7])
 time = np.arange(0,41)*0.05
-
+np.random.seed(0)
+# index = [3]
 with torch.no_grad():
-        for i in range(test_data.shape[0]):
+        for i in range(0,1500):
             input_array = test_data[i,0,:]
             env_options = iiwa14EnvOptions(dt = 0.05,x_start = input_array.reshape(14,1),x_end = x_ref,sim_time = 2,sim_noise_R = None,contr_input_state = 'real')
             env = iiwa14Env(env_options)
@@ -106,13 +114,15 @@ with torch.no_grad():
                 next_pee = iiwa14_model.forward_kinemetics(next_input[:7])
                 state = np.vstack((state,next_input.reshape(1,14)))
                 current_y = np.hstack((next_input.reshape(1,14),next_pee.reshape(1,3)))
-                print("current_y shape:",current_y.shape)
+                # print("current_y shape:",current_y.shape)
                 outputy = np.vstack((outputy,current_y))
                 sum_reward += step_reward
                 inputs = torch.Tensor(next_input)
-            plot_actions(predict_actions[1:,:],test_actions[i,:,:].reshape(40,7))   
-            plot_measurements(time,outputy,pee_ref)
+            # plot_actions(predict_actions[1:,:],test_actions[i,:,:].reshape(40,7))   
+            # plot_measurements(time,outputy,pee_ref,expert_output[i,:,:].reshape(41,17))
                 
             reward.append(sum_reward)
+            # print(reward)
+            np.save('training_logger/dagger_reward.npy',reward)
 
-print(reward)
+

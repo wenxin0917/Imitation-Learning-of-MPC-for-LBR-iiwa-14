@@ -12,7 +12,8 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
     dq = y[:, 7:14]
     pee = y[:, 14:]
     do_plot = True
-    """
+    q_ref = [-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37]
+    
     q_lbls = [fr'$q_{k}$ [rad]' for k in range(1, 8)]
     
     if axs is None:
@@ -22,9 +23,10 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         do_plot = False
     for k, ax in enumerate(axs_q.reshape(-1)):
         ax.plot(t, q[:, k])
+        ax.axhline(q_ref[k], ls='--', color='red')
         ax.set_ylabel(q_lbls[k])
         ax.grid(alpha=0.5)
-    axs_q[2].set_xlabel('t [s]')
+    axs_q[6].set_xlabel('t [s]')
     plt.tight_layout()
 
     dq_lbls = [fr'$\dot q_{k}$ [rad/s]' for k in range(1, 8)]
@@ -33,8 +35,9 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         ax.plot(t, dq[:, k])
         ax.set_ylabel(dq_lbls[k])
         ax.grid(alpha=0.5)
+    axs_dq[6].set_xlabel('t [s]')
     plt.tight_layout()
-    """
+    
     
     pee_lbls = [r'$p_{ee,x}$ [m]', r'$p_{ee,y}$ [m]', r'$p_{ee,z}$ [m]']
     _, axs_pee = plt.subplots(3, 1, sharex=True, figsize=(6, 8))
@@ -44,7 +47,9 @@ def plot_measurements(t: np.ndarray, y: np.ndarray, pee_ref: np.ndarray = None, 
         ax.axhline(pee_ref[k], ls='--', color='red')
 
         ax.set_ylabel(pee_lbls[k])
+        
         ax.grid(alpha=0.5)
+    axs_pee[2].set_xlabel('t [s]') 
     plt.tight_layout()
     if do_plot:
         plt.show()
@@ -112,7 +117,7 @@ def plot_q_dq(t,y):
         ax.plot(t, q[:, k])
         ax.set_ylabel(q_lbls[k])
         ax.grid(alpha=0.5)
-    axs_q[2].set_xlabel('t [s]')
+    axs_q[6].set_xlabel('t [s]')
     plt.tight_layout()
     plt.show()
 
@@ -122,5 +127,6 @@ def plot_q_dq(t,y):
         ax.plot(t, dq[:, k])
         ax.set_ylabel(dq_lbls[k])
         ax.grid(alpha=0.5)
+    axs_dq[6].set_xlabel('t [s]')
     plt.tight_layout()
     plt.show()

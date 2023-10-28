@@ -44,7 +44,7 @@ angu_vel = (s[1]-s[0])/time_interval
 joint7_angu_vel[:,2] = angu_vel
 joint7_vel = np.hstack((joint7_linear_vel, joint7_angu_vel))
 
-np.savetxt('/200circle_xy0.1_vel.txt', joint7_vel, delimiter=',', fmt='%f') 
+np.savetxt('mpc_result/200circle_xy0.1_vel.txt', joint7_vel, delimiter=',', fmt='%f') 
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
