@@ -1,7 +1,7 @@
 {
     "acados_include_path": "/home/wenxin/acados/include",
     "acados_lib_path": "/home/wenxin/acados/lib",
-    "code_export_directory": "/tmp/tmpak6_7eny",
+    "code_export_directory": "/tmp/tmp8wvixy6p",
     "constraints": {
         "C": [],
         "C_e": [],
@@ -132,7 +132,7 @@
         "lg": [],
         "lg_e": [],
         "lh": [
-            0.0
+            -1000.0
         ],
         "lh_e": [],
         "lphi": [],
@@ -202,7 +202,7 @@
         "ug": [],
         "ug_e": [],
         "uh": [
-            1000.0
+            0.4
         ],
         "uh_e": [],
         "uphi": [],
@@ -3780,7 +3780,7 @@
     },
     "json_file": "acados_ocp_iiwa14.json",
     "model": {
-        "con_h_expr": "@1=eval_fkp(q){0}, (((0.577*@1[0])-@1[1])-2.485)",
+        "con_h_expr": "eval_fkp(q){0}[1]",
         "con_h_expr_e": null,
         "con_phi_expr": null,
         "con_phi_expr_e": null,

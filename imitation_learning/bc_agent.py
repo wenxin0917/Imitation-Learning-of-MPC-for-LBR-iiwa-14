@@ -24,12 +24,12 @@ class BCAgent:
         )
         """
         
-        
+        """
         # load the trained bc model for Dagger training
         self.actor = MLPPolicy(14,7,6,256,device='cpu',lr=0.001,training= True)
         checkpoint = torch.load('training_logger/bc4_policy_itr_999.pth')
         self.actor.load_state_dict(checkpoint)
-        
+        """
         
         
         # replay buffer to store data
