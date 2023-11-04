@@ -12,7 +12,7 @@ class BCAgent:
         self.params = params
         # actor/policy
         
-        """
+        
         # initialize for BC 
         self.actor = MLPPolicy(
             self.params['ob_dim'],
@@ -22,7 +22,7 @@ class BCAgent:
             self.params['device'],
             self.params['learning_rate']
         )
-        """
+        
         
         """
         # load the trained bc model for Dagger training

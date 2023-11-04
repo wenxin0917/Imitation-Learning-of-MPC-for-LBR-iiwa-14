@@ -21,11 +21,11 @@ N_mpc = 2 # prediction horizon
 N_ITER = 1 #number of simulation iterations
 
 Q_0 = np.zeros(7)
-Q_ref = q = np.loadtxt('/200circle_joint_xy0.1.txt',delimiter=',')
+Q_ref = q = np.loadtxt('mpc_result/200circle_joint_xy0.1.txt',delimiter=',')
 DQ_0 = np.zeros(7)
 # DQ_ref = np.zeros(7)
-DQ_ref = np.loadtxt('/200circle_joint_xy0.1_vel.txt',delimiter=',')
-pee_ref = np.loadtxt('/200circle_xy0.1.txt',delimiter=',')
+DQ_ref = np.loadtxt('mpc_result/200circle_joint_xy0.1_vel.txt',delimiter=',')
+pee_ref = np.loadtxt('mpc_result/200circle_xy0.1.txt',delimiter=',')
 
 R_Q_sim = np.array([0] * 7)
 R_DQ_sim = np.array([0] * 7)
@@ -111,9 +111,9 @@ if __name__ == "__main__":
     u = np.vstack(u)
     y = np.vstack(y)
    
-    np.save("/circle_torque_final.npy", u)  
-    np.save("/circle_state_final.npy", x) 
-    np.save("/circle_output_final.npy", y)   
+    np.save("mpc_result/circle_torque_final.npy", u)  
+    np.save("mpc_result/circle_state_final.npy", x) 
+    np.save("mpc_result/circle_output_final.npy", y)   
     
     # plot the circle trajectory
     fig = plt.figure()

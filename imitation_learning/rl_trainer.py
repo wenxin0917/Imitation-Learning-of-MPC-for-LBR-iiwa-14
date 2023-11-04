@@ -71,12 +71,12 @@ class RL_Trainer(object):
             scheluer.step()
             
         print("\nSaving agent's actor...")
-        self.agent.actor.save(self.params['logdir'] + '/try2_policy_itr_'+str(itr)+'.pth')
+        self.agent.actor.save(self.params['logdir'] + '/bc_policy_itr_'+str(itr)+'.pth')
 
         # save the list to a file
-        with open('training_logger/training_loss_try_2.pkl','wb') as file:
+        with open('training_logger/training_loss_bc.pkl','wb') as file:
             pickle.dump(training_loss,file)
-        with open('training_logger/validation_loss_try_2.pkl','wb') as file:
+        with open('training_logger/validation_loss_bc.pkl','wb') as file:
             pickle.dump(validation_loss,file)
             
             
@@ -133,13 +133,13 @@ class RL_Trainer(object):
             
         # save policy
         print("\nSaving agent's actor...")
-        self.agent.actor.save(self.params['logdir'] + '/try2_policy_itr_'+str(itr)+'.pth')
+        self.agent.actor.save(self.params['logdir'] + '/dagger_policy_itr_'+str(itr)+'.pth')
         # print("current learning rate is : ",optimizer.param_groups[0]["lr"])
             
         # save the list to a file
-        with open('training_logger/training_loss_try_2.pkl','wb') as file:
+        with open('training_logger/training_loss_dagger.pkl','wb') as file:
             pickle.dump(training_loss,file)
-        with open('training_logger/validation_loss_try_2.pkl','wb') as file:
+        with open('training_logger/validation_loss_dagger.pkl','wb') as file:
             pickle.dump(validation_loss,file)
             
     

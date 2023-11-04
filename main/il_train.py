@@ -60,8 +60,8 @@ class DAgger_Trainer(object):
         ## RL TRAINER
         ################
         self.rl_trainer = RL_Trainer(self.params)
-        initial_state = np.load('expert_data/dagger_states_2.npy')
-        initial_action = np.load('expert_data/dagger_actions_2.npy')
+        initial_state = np.load('expert_data/train_states.npy')
+        initial_action = np.load('expert_data/train_actions.npy')
         self.rl_trainer.buffer.add_data(initial_state,initial_action)
     
     
@@ -164,72 +164,9 @@ def plot_training_validation_loss():
         
 if __name__ == "__main__":
     
-    """
-    # load the expert data
-    for i in range(1,11):
-        state = np.load('expert_data/{}state_0.3.npy'.format(i))
-        action = np.load('expert_data/{}action_0.3.npy'.format(i))
-        output = np.load('expert_data/{}output_0.3.npy'.format(i))
-        state = np.delete(state,40,axis=1)
-        if i == 1:
-            new_state = state
-            new_action = action
-            new_output = output
-        else:
-            new_state = np.vstack((new_state,state))
-            new_action = np.vstack((new_action,action))
-            new_output = np.vstack((new_output,output))
-
-    print(new_state.shape)
-    print(new_action.shape)
-
-
-    # Split the data into train, validation sets
-    train_states, validation_states, train_actions, validation_actions = train_test_split(
-    new_state, new_action, test_size=0.01, random_state=20
-    )
-
-    train_states = np.reshape(train_states,(-1,14))
-    train_actions = np.reshape(train_actions,(-1,7))
-    np.save('expert_data/train_states.npy',train_states)
-    np.save('expert_data/train_actions.npy',train_actions)
-    validation_states = np.reshape(validation_states,(-1,14))
-    validation_actions = np.reshape(validation_actions,(-1,7))
-    np.save('expert_data/validation_states.npy',validation_states)
-    np.save('expert_data/validation_actions.npy',validation_actions)
-    
-    # test_states = np.reshape(test_states,(-1,14))
-    # test_actions = np.reshape(test_actions,(-1,7))
-    # np.save('expert_data/test_states.npy',test_states)
-    # np.save('expert_data/test_actions.npy',test_actions)
-    """
-    
-    """
-    try_train_states = np.load('expert_data/2state_0.3.npy')
-    try_train_states = np.delete(try_train_states,40,axis=1).reshape(-1,14)
-    try_train_actions = np.load('expert_data/2action_0.3.npy').reshape(-1,7)
-    
-    
-    # train_states = np.load('expert_data/train_states.npy')
-    # train_actions = np.load('expert_data/train_actions.npy')
-    #print(train_states.shape)
-    #print(train_actions.shape)
-    
-    
-    
-    # Shuffle the data
-    seed = 30  # Set a seed for reproducibility
-    np.random.seed(seed)
-    indices = np.arange(len(try_train_states))
-    np.random.shuffle(indices)
-    
-    shuffled_states = try_train_states[indices]
-    shuffled_actions = try_train_actions[indices]
-    # np.save('expert_data/train_states.npy',shuffled_states)
-    # np.save('expert_data/train_actions.npy',shuffled_actions)
-    """
-    
-    # bc_main(6,256,0.001,10,shuffled_states,shuffled_actions)
+    initial_state = np.load('expert_data/train_states.npy')
+    initial_action = np.load('expert_data/train_actions.npy')
+    bc_main(6,256,0.001,10,initial_state,initial_action)
     # dagger_main()
     plot_training_validation_loss()
     

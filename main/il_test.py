@@ -119,6 +119,8 @@ with torch.no_grad():
             sum_reward += step_reward
             inputs = torch.Tensor(next_input)
         reward.append(sum_reward)
+        print(reward)
         # plot_actions(predict_actions[1:,:],test_actions[i,:,:].reshape(40,7))
         # plot_measurements(time,outputy,pee_ref,expert_output[i,:,:].reshape(41,17))
-        np.save('training_logger/bc_reward.npy',reward)
+    
+    np.save('training_logger/bc_reward.npy',reward)
