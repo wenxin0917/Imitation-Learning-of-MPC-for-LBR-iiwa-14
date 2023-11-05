@@ -70,7 +70,10 @@ def generate_expert_data(horizon_n,x_0,x_ref):
     # print("Execution time: ", execution_time, " seconds")
     return x,u,y
 
-def sample_rand_initial_position(alpha:float,q_range:np.array):  
+def sample_rand_initial_position(alpha:float,q_range:np.array):
+        """
+        Generate random initial position for the robot.
+        """ 
         q = []
         for limit in q_range:
             single_joint = np.random.uniform(alpha * limit, -alpha * limit)
@@ -81,9 +84,8 @@ def sample_rand_initial_position(alpha:float,q_range:np.array):
         return x
     
 def generate_expert_data_with_NN(mixture_ratio,agent,x_0):
-    
     """
-    Mix policy.
+    Mix policy( Dagger ).
     """
     # MPC parameters
     DT = 0.05 # sampling time
@@ -130,9 +132,9 @@ def generate_expert_data_with_NN(mixture_ratio,agent,x_0):
     for i in range(env.max_intg_steps):
         a = MPC_controller.compute_torques(q=qk, dq=dqk,t = i*DT)
         print("the torque is ",a)
+        # consider the case that there is no solution for some states"""
         if np.all(a == np.zeros((7,))):
             return a,a,a
-        # print("yes")
         state, reward, done, info = env.step_mix_with_policy(a,mixture_ratio,agent)
         qk, dqk = np.expand_dims(state[0:nq], 1), np.expand_dims(state[nq:], 1 )
         if done:
@@ -151,15 +153,16 @@ if __name__ == "__main__":
     
     
     # generate expert data for imitation learning
-    expert_data_state = np.zeros((10,41,14))
-    expert_data_action = np.zeros((10,40,7))
-    expert_data_output= np.zeros((10,41,17))
+    expert_data_state = np.zeros((6000,41,14))
+    expert_data_action = np.zeros((6000,40,7))
+    expert_data_output= np.zeros((6000,41,17))
     q_range = np.deg2rad([170,120,170,120,170,120,175])
     alpha = 0.3
     np.random.seed(10)
     used_initial_position = set()
-    for i in range(10):
+    for i in range(6000):
         x_0 = sample_rand_initial_position(alpha,q_range)
+        # in case there are repeated initial positions
         x_0_tuple = tuple(x_0.flatten())
         if x_0_tuple not in used_initial_position:
             used_initial_position.add(x_0_tuple)
@@ -167,7 +170,7 @@ if __name__ == "__main__":
             i= i-1
     used_initial_position_list = list(used_initial_position)
     
-    for i in range(10):
+    for i in range(6000):
         x_ref = np.array([-0.44,0.14,2.02,-1.61,0.57,-0.16,-1.37,0,0,0,0,0,0,0]).reshape(14,1)
         x,u,y = generate_expert_data(5,np.array(used_initial_position_list[i]).reshape(14,1),x_ref)
         expert_data_state[i,:,:] = x
@@ -175,15 +178,6 @@ if __name__ == "__main__":
         expert_data_output[i,:,:] = y
         print("",i)
     
-    np.save('expert_data/11state_0.3.npy',expert_data_state)
-    np.save('expert_data/11action_0.3.npy',expert_data_action)
-    np.save('expert_data/11output_0.3.npy',expert_data_output)
-    
-    """
-    
-    # test generate_expert_data_one_step function 
-    state = np.load('expert_data/train_states.npy')
-    index = [5,10,14,20,28,35,45,58,75]
-    new_actions = generate_expert_data_one_step(state[index,:])
-    print(new_actions)
-    """
+    np.save('expert_data/6000expert_state_0.3.npy',expert_data_state)
+    np.save('expert_data/6000expert_action_0.3.npy',expert_data_action)
+    np.save('expert_data/6000expert_output_0.3.npy',expert_data_output)

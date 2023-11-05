@@ -2,7 +2,6 @@ import numpy as np
 import time
 
 from imitation_learning.MLP_policy import *
-from imitation_learning.utils import *
 from imitation_learning.replay_buffer import ReplayBuffer
 
 class BCAgent:
@@ -22,15 +21,6 @@ class BCAgent:
             self.params['device'],
             self.params['learning_rate']
         )
-        
-        
-        """
-        # load the trained bc model for Dagger training
-        self.actor = MLPPolicy(14,7,6,256,device='cpu',lr=0.001,training= True)
-        checkpoint = torch.load('training_logger/bc4_policy_itr_999.pth')
-        self.actor.load_state_dict(checkpoint)
-        """
-        
         
         # replay buffer to store data
         self.replay_buffer = ReplayBuffer(

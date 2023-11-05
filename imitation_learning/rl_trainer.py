@@ -8,7 +8,6 @@ import torch
 import random
 
 from utils import *
-from imitation_learning.logger import Logger
 from environment.gym_env import iiwa14Env,iiwa14EnvOptions
 from imitation_learning.bc_agent import BCAgent
 from imitation_learning.replay_buffer import ReplayBuffer
@@ -21,7 +20,6 @@ class RL_Trainer(object):
         
         # get params, create logger
         self.params = params
-        self.logger = Logger(self.params['logdir'])
         
         # set random seeds , it helps to reproduce the results
         seed = self.params['seed']
@@ -31,12 +29,6 @@ class RL_Trainer(object):
         # make the gym environments
         self.env = iiwa14Env(iiwa14EnvOptions(dt= 0.05,x_start=None,x_end=None,sim_time=None,sim_noise_R=None,contr_input_state=None))
         
-        """
-        # Observation and action sizes
-        ob_dim = self.env.observation_space.shape[0]
-        ac_dim = self.env.action_space.shape[0]
-        """
-        
         # create the agent
         self.agent = BCAgent(self.env, self.params)
         # create the data buffer
@@ -45,8 +37,8 @@ class RL_Trainer(object):
     def run_training_loop_bc(self, n_iter,initial_expert_state=None,initial_expert_action=None):
        
         """
-        :param n_iter:  number of (dagger) iterations
-        :param initial_expert_state/action : 
+        param n_iter:  number of (dagger) iterations
+        param initial_expert_state/action : 
         """
         
         optimizer = self.agent.actor.optimizer
@@ -101,8 +93,7 @@ class RL_Trainer(object):
     def run_training_loop_dagger(self, n_iter):
        
         """
-        :param n_iter:  number of (dagger) iterations
-        :param initial_expert_state/action : 
+        param n_iter:  number of (dagger) iterations 
         """
         
         optimizer = self.agent.actor.optimizer
@@ -122,14 +113,6 @@ class RL_Trainer(object):
             training_loss.append(total_loss / self.params['num_agent_train_steps_per_iter'])
             validation_loss.append(self.validation_process())
             scheluer.step()
-            
-            """
-            # save the model
-            if (itr+1) % 5 == 0:
-                # save policy
-                print("\nSaving agent's actor...")
-                self.agent.actor.save(self.params['logdir'] + '/dagger1_policy_itr_'+str(itr)+'.pth')
-            """
             
         # save policy
         print("\nSaving agent's actor...")
@@ -224,7 +207,7 @@ class RL_Trainer(object):
             else:   
                 self.buffer.add_data(explored_states,explored_actions)
                 new_states,new_actions = self.buffer.get_data()
-                np.save("expert_data/dagger_states_2.npy",new_states)
-                np.save("expert_data/dagger_actions_2.npy",new_actions)
+                np.save("expert_data/dagger_states.npy",new_states)
+                np.save("expert_data/dagger_actions.npy",new_actions)
 
         return 
