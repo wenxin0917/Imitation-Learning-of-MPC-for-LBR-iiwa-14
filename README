@@ -7,5 +7,42 @@ Environment:
    this library is used for the cpp file folder to generate files that will be use in the 
 6. to install pinocchio python package,this package can only be installed in anaconda virtual environment
 
+explanation of the file folders:
+cpp folders: generates several CasADi function files for symbolic modeling and simulation of a robotic system. These files are generated to facilitate the symbolic analysis and simulation of the robot's dynamics and kinematics.
+aba.casadi: This file contains the symbolic model for the robot's articulated body algorithm (ABA), which is used for computing the forward dynamics of the robot
+rnea.casadi: This file contains the symbolic model for the recursive Newton-Euler algorithm (RNEA), which is used for computing the inverse dynamics of the robot.
+fkp.casadi: This file contains the symbolic model for the robot's forward kinematics, specifically for computing the end-effector (EE) position.
+fkv.casadi: This file contains the symbolic model for the robot's forward kinematics, specifically for computing the end-effector velocity.
+fkJ.casadi: This file contains the symbolic model for the robot's forward kinematics, specifically for computing the Jacobian matrix of the end-effector.
 
+environment: Implements a gym environment for the robot arm. The environment is used for simulation and imitation learning.
 
+expert_data: contain all the data that will be used in the imitation learning training process.
+generate_expert: contain functions: generate expert data for BC; generate initial position; generate expert data for Dagger
+
+imitation_learning: contain all the files that will be used in imitation learning
+MLP_Policy.py: define the structure of the neural network, define the forward, loss computation, get nn output, save model file functions
+bc_agent: define the agent that will interact with the reinforcement learning environment
+replay_buffer: define the fuctions for store new expert data during the dagger algorithm
+rl_trainer: define training loop for BC and Dagger algorithm
+
+main: evaluate_moc.py; il_test.py;il_train.py;mpc_circle.py
+
+matlab: calculate symbolic homogeneous matrix, jacobian matrix,and inverse dynamic formulation
+
+model: all the files that is related to the robot model
+iiwa14_model.py: create symbolic iiwa14 model and some necessary functions like gravity torques and forward kinematics
+circle_pee_ref: design the circle trajectory
+circle_joint_ref: this file must be run in anaconda virtual environemnt installed pinocchio python package, this calculates the joint reference of the circle
+
+mpc_controller: set up the NMPC problem, transfer the math formula into code;
+
+mpc_result: store all the mpc solution to visulize in ros tool
+
+ros_visulization: this is a ros workspace
+
+simulation: define a simulator for simulating the trajectory of the manipulator
+
+training_logger: log all the trianing files
+
+utils: define all the plotting functions to visualize the simulation results
