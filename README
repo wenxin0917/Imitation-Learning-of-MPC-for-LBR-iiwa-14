@@ -4,7 +4,7 @@ Environment:
 3. git,make,cmake installed for open source libraries
 4. acados: https://docs.acados.org/installation/index.html#linux-mac; python API : https://docs.acados.org/python_interface/index.html#installation
 5. pinocchio library: https://stack-of-tasks.github.io/pinocchio/download.html, 
-   this library is used for the cpp file folder to generate files that will be use in the 
+   this library is used for the cpp file folder to generate files that will be use in the symbolic model
 6. to install pinocchio python package,this package can only be installed in anaconda virtual environment
 
 explanation of the file folders:
